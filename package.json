@@ -1,0 +1,22 @@
+{
+  "name": "networklogin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "login.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/CH3CHOHCH3/NetworkLogin.git"
+  },
+  "author": "CH3CHOHCH3",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CH3CHOHCH3/NetworkLogin/issues"
+  },
+  "homepage": "https://github.com/CH3CHOHCH3/NetworkLogin#readme",
+  "dependencies": {
+    "node-fetch": "^3.0.0"
+  }
+}
