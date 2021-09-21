@@ -5,10 +5,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const info = require('./cryptos/info');
 const { spawnSync } = require('child_process')
 
-const config = JSON.parse(fs.readFileSync(__dirname + '/config.json','UTF-8'));
-
-var username = config.usr;
-var password = config.pwd;
+const [username, password] = process.argv;
 
 // 校园网的地址必定是 10. 开头的
 const ip = spawnSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'");
