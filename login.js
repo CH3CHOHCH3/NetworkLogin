@@ -3,12 +3,15 @@ const crypto = require('crypto');
 const md5 = require('./cryptos/md5');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const info = require('./cryptos/info');
+const { spawnSync } = require('child_process')
 
 const config = JSON.parse(fs.readFileSync(__dirname + '/config.json','UTF-8'));
 
 var username = config.usr;
 var password = config.pwd;
-var ip = config.ip;
+
+// 校园网的地址必定是 10. 开头的
+const ip = spawnSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'");
 
 const callback = "jQuery112406199704547613489_";
 
