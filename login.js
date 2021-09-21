@@ -3,7 +3,8 @@ const crypto = require('crypto');
 const md5 = require('./cryptos/md5');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const info = require('./cryptos/info');
-const { spawnSync } = require('child_process')
+const { spawnSync } = require('child_process');
+const { exit } = require('process');
 
 const [username, password] = process.argv;
 
@@ -77,10 +78,8 @@ async function login(){
 				"method": "GET",
 				"mode": "cors"
 			}).then(res=>{
-				if(res.ok)return res.text();
-				else console.log("err");
-			}).then(text=>{
-				console.log(text);
+				if(res.ok) exit(0);
+				else exit(1);
 			});
         });
     });
