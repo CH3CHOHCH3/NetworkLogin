@@ -3,13 +3,15 @@ const crypto = require('crypto');
 const md5 = require('./cryptos/md5');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const info = require('./cryptos/info');
-const { spawnSync } = require('child_process');
+const { execSync } = require('child_process');
 const { exit } = require('process');
 
-const [username, password] = process.argv;
+// 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
+const [,, username, password] = process.argv;
 
 // 校园网的地址必定是 10. 开头的
-const ip = spawnSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'");
+// exec 的返回值是 Buffer 或者是 String, 二者都可以 toString, trim 以去掉最后的回车
+const ip = execSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'").toString().trim();
 
 const callback = "jQuery112406199704547613489_";
 
