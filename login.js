@@ -7,15 +7,15 @@ import pRetry from 'p-retry';
 import { AbortError } from 'p-retry';
 
 // 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
-// const [, , username, password] = process.argv;
-const [username, password] = ['210110520', 'Hgnl...123456'];
+const [, , username, password] = process.argv;
 
 // 校园网的地址必定是 10. 开头的
 // exec 的返回值是 Buffer 或者是 String, 二者都可以 toString, trim 以去掉最后的回车
-const ip = execSync('ipconfig getifaddr en0').toString().trim();
+const ip = execSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'").toString().trim();
+// macOS 用户用这个：
+// const ip = execSync('ipconfig getifaddr en0').toString().trim();
 
 const callback = "jQuery112406199704547613489_";
-
 
 function sha1(data) {
   return crypto
