@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/CH3CHOHCH3/NetworkLogin#readme",
   "dependencies": {
-    "node-fetch": "^3.0.0"
-  }
+    "node-fetch": "^3.0.0",
+    "p-retry": "^5.1.1"
+  },
+  "type": "module"
 }
