@@ -30,9 +30,19 @@ const callback = "jQuery112406199704547613489_";
 
 function sha1(data) {
   return crypto
-      .createHash('sha1')
-      .update(data, "binary")
-      .digest("hex");
+    .createHash('sha1')
+    .update(data, "binary")
+    .digest("hex");
+}
+
+async function test_connectivity() {
+  const testRes = await fetch('http://baidu.com');
+  if (!testRes || !testRes.ok) throw new Error(result.statusText);
+  const testBody = await testRes.text();
+  // console.log(testBody);
+  if (!(testRes.ok && testBody.startsWith('<html>'))) {
+    throw new Error('No connection.');
+  }
 }
 
 async function login() {
@@ -94,19 +104,17 @@ async function login() {
   // console.log(result);
   if (!result || !result.ok) throw new Error(result.statusText);
 
-  const testRes = await fetch('http://baidu.com');
-  if (!testRes || !testRes.ok) throw new Error(result.statusText);
-  const testBody = await testRes.text();
-  // console.log(testBody);
-  if (!(testRes.ok && testBody.startsWith('<html>'))) {
-    throw new Error('No connection.');
-  }
+  await test_connectivity();
 }
 
 // await login().catch(err => console.log(err));
-await pRetry(login, {
-  onFailedAttempt: err => {
-    console.log(`Attempt ${err.attemptNumber} failed. There are ${err.retriesLeft} retries left.`);
-  },
-  retries: 14
-});
+try {
+  await test_connectivity()
+} catch {
+  await pRetry(login, {
+    onFailedAttempt: err => {
+      console.log(`Attempt ${err.attemptNumber} failed. There are ${err.retriesLeft} retries left.`);
+    },
+    retries: 14
+  });
+}
