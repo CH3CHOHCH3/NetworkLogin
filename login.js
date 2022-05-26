@@ -82,11 +82,13 @@ async function login() {
   }), 2000);
   // console.log(result);
   if (!result.ok) throw new Error(result.statusText);
-
-  dns.lookup('www.aliyun.com', { family: 4 }, (err, address, family) => {
-    if (address.startsWith('10.') || err)
-      throw new Error('No connection.');
-  });
+  
+  const testRes = await fetch('http://baidu.com');
+  const testBody = await testRes.text();
+  // console.log(testBody);
+  if (!testRes.ok || !testBody.startsWith('<html>')) {
+    throw new Error('No connection.');
+  }
 }
 
 pRetry(login, {
