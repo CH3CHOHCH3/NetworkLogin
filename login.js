@@ -4,7 +4,6 @@ import info from './cryptos/info.cjs';
 import fetch from 'node-fetch';
 import { execSync } from 'child_process';
 import pRetry from 'p-retry';
-import { AbortError } from 'p-retry';
 
 // 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
 const [, , username, password] = process.argv;
@@ -92,10 +91,10 @@ async function login() {
     "body": null,
     "method": "GET",
     "mode": "cors"
-  }).catch(_ => {
-    throw new AbortError('Error')
+  }).catch(err => {
+    throw new Error(err.toString());
   }).then(res => {
-    if (!res.ok) throw new AbortError('Error')
+    if (!res.ok) throw new Error(res.statusText);
   }));
 }
 
