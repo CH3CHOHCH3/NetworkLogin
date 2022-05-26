@@ -2,19 +2,34 @@ import crypto from 'crypto';
 import md5 from './cryptos/md5.cjs';
 import info from './cryptos/info.cjs';
 import fetch from 'node-fetch';
-import { execSync } from 'child_process';
 import pRetry from 'p-retry';
 import pTimeout from 'p-timeout';
-import dns from 'dns';
+import { networkInterfaces } from 'os';
+
+const getIp = () => {
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+      // 'IPv4' is in Node <= 17, from 18 it's a number 4 or 6
+      const familyV4Value = typeof net.family === 'string' ? 'IPv4' : 4
+      if (net.family === familyV4Value && !net.internal && net.address.startsWith('10.')) {
+        return net.address;
+      }
+    }
+  }
+}
 
 // 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
 const [, , username, password] = process.argv;
 
 // 校园网的地址必定是 10. 开头的
 // exec 的返回值是 Buffer 或者是 String, 二者都可以 toString, trim 以去掉最后的回车
-const ip = execSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'").toString().trim();
+// const ip = execSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'").toString().trim();
 // macOS 用户用这个：
 // const ip = execSync('ifconfig getifaddr en0').toString().trim();
+const ip = getIp();
+console.log(ip);
 
 const callback = "jQuery112406199704547613489_";
 
@@ -82,7 +97,7 @@ async function login() {
   }), 2000);
   // console.log(result);
   if (!result.ok) throw new Error(result.statusText);
-  
+
   const testRes = await fetch('http://baidu.com');
   const testBody = await testRes.text();
   // console.log(testBody);
