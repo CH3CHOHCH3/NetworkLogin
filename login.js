@@ -1,3 +1,4 @@
+
 import crypto from 'crypto';
 import md5 from './cryptos/md5.cjs';
 import info from './cryptos/info.cjs';
@@ -22,12 +23,6 @@ const getIp = () => {
 
 // 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
 const [, , username, password] = process.argv;
-
-// 校园网的地址必定是 10. 开头的
-// exec 的返回值是 Buffer 或者是 String, 二者都可以 toString, trim 以去掉最后的回车
-// const ip = execSync("ip addr | grep -o 'inet 10.[^/]*' | grep -o '[0-9.]*'").toString().trim();
-// macOS 用户用这个：
-// const ip = execSync('ifconfig getifaddr en0').toString().trim();
 const ip = getIp();
 console.log(ip);
 
@@ -35,9 +30,9 @@ const callback = "jQuery112406199704547613489_";
 
 function sha1(data) {
   return crypto
-    .createHash('sha1')
-    .update(data, "binary")
-    .digest("hex");
+      .createHash('sha1')
+      .update(data, "binary")
+      .digest("hex");
 }
 
 async function login() {
@@ -54,9 +49,12 @@ async function login() {
     "method": "GET",
     "mode": "cors"
   }), 1000);
-  // (console.log(response);
-  if (!response.ok) throw new Error(response.statusText);
-  const challenge = (await response.text()).match(/"challenge":"(.*?)",/)[1];
+  // console.log(response);
+  if (!response || !response.ok) throw new Error(response.statusText);
+  const responseBody = await response.text();
+  const matches = responseBody.match(/"challenge":"(.*?)",/);
+  if (!matches || matches.length < 2) throw new Error(`Challenge not found in '${responseBody}'.`);
+  const challenge = matches[1];
 
   var i = info({
     username: username,
@@ -92,23 +90,23 @@ async function login() {
     "body": null,
     "method": "GET",
     "mode": "cors"
-  }).catch(err => {
-    throw new Error(err.toString());
   }), 2000);
   // console.log(result);
-  if (!result.ok) throw new Error(result.statusText);
+  if (!result || !result.ok) throw new Error(result.statusText);
 
   const testRes = await fetch('http://baidu.com');
+  if (!testRes || !testRes.ok) throw new Error(result.statusText);
   const testBody = await testRes.text();
   // console.log(testBody);
-  if (!testRes.ok || !testBody.startsWith('<html>')) {
+  if (!(testRes.ok && testBody.startsWith('<html>'))) {
     throw new Error('No connection.');
   }
 }
 
-pRetry(login, {
-  onFailedAttempt: error => {
-    console.log(`Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`);
+// await login().catch(err => console.log(err));
+await pRetry(login, {
+  onFailedAttempt: err => {
+    console.log(`Attempt ${err.attemptNumber} failed. There are ${err.retriesLeft} retries left.`);
   },
-  retries: 60
+  retries: 14
 });
