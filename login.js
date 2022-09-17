@@ -1,4 +1,3 @@
-
 import crypto from 'crypto';
 import md5 from './cryptos/md5.cjs';
 import info from './cryptos/info.cjs';
@@ -36,11 +35,11 @@ function sha1(data) {
 }
 
 async function test_connectivity() {
-  const testRes = await fetch('http://baidu.com');
+  const testRes = await fetch('http://www.aliyun.com');
   if (!testRes || !testRes.ok) throw new Error(result.statusText);
   const testBody = await testRes.text();
   // console.log(testBody);
-  if (!(testRes.ok && testBody.startsWith('<html>'))) {
+  if (!(testRes.ok && testBody.trimStart().startsWith('<html>'))) {
     throw new Error('No connection.');
   }
 }
@@ -109,7 +108,7 @@ async function login() {
 
 // await login().catch(err => console.log(err));
 try {
-  await test_connectivity()
+  await test_connectivity();
 } catch {
   await pRetry(login, {
     onFailedAttempt: err => {
