@@ -35,11 +35,21 @@ function sha1(data) {
 }
 
 async function test_connectivity() {
-  const testRes = await fetch('http://www.aliyun.com');
+  const testRes = await pTimeout(fetch("http://secr.baidu.com/", {
+    "headers": {
+      "accept": "text/html",
+      "cache-control": "no-cache",
+      "pragma": "no-cache",
+      "upgrade-insecure-requests": "1",
+    },
+    "referrerPolicy": "strict-origin-when-cross-origin",
+    "body": null,
+    "method": "GET"
+  }), 1000);
   if (!testRes || !testRes.ok) throw new Error(result.statusText);
-  const testBody = await testRes.text();
-  // console.log(testBody);
-  if (!(testRes.ok && testBody.trimStart().startsWith('<html>'))) {
+  const testBody = (await testRes.text()).trimStart();
+  // console.log(testBody.substring(0, 20));
+  if (!(testRes.ok && (testBody.startsWith('<!DOCTYPE') || testBody.startsWith('<html')))) {
     throw new Error('No connection.');
   }
 }
