@@ -45,7 +45,7 @@ async function test_connectivity() {
   if (debug) {
     st = performance.now();
   }
-  const testRes = await pTimeout(fetch("https://passport.baidu.com/passApi/html/_blank.html", {
+  const testRes = await pTimeout(fetch("http://connectivitycheck.platform.hicloud.com/generate_204", {
     "body": null,
     "method": "GET"
   }), 1000);
@@ -53,24 +53,11 @@ async function test_connectivity() {
     et = performance.now();
     console.log('test_connectivity time:', et - st);
   }
-  // const testRes = await pTimeout(fetch("http://secr.baidu.com/", {
-  //   "headers": {
-  //     "accept": "text/html",
-  //     "cache-control": "no-cache",
-  //     "pragma": "no-cache",
-  //     "upgrade-insecure-requests": "1",
-  //   },
-  //   "referrerPolicy": "strict-origin-when-cross-origin",
-  //   "body": null,
-  //   "method": "GET"
-  // }), 1000);
   if (!testRes || !testRes.ok) throw new Error(result.statusText);
-  // const testBody = (await testRes.text()).trimStart();
-  const testBody = (await testRes.text()).trim()
   if (debug) {
-    console.log("testBody:", testBody.substring(0, 20));
+    console.log("testRes status:", testRes.status);
   }
-  if (!(testRes.ok && testBody == '')) {
+  if (testRes.status !== 204) {
     throw new Error('No connection.');
   }
 }
