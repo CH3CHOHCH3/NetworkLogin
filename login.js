@@ -1,11 +1,17 @@
-
 import crypto from 'crypto';
 import md5 from './cryptos/md5.cjs';
 import info from './cryptos/info.cjs';
 import fetch from 'node-fetch';
+import inspector from 'node:inspector';
 import pRetry from 'p-retry';
 import pTimeout from 'p-timeout';
 import { networkInterfaces } from 'os';
+
+const debug = inspector.url() !== undefined;
+
+if (debug) {
+    var st, et;
+}
 
 const getIp = () => {
   const nets = networkInterfaces();
@@ -36,16 +42,30 @@ function sha1(data) {
 }
 
 async function test_connectivity() {
-  const testRes = await fetch('http://baidu.com');
+  if (debug) {
+    st = performance.now();
+  }
+  const testRes = await pTimeout(fetch("http://connectivitycheck.platform.hicloud.com/generate_204", {
+    "body": null,
+    "method": "GET"
+  }), 1000);
+  if (debug) {
+    et = performance.now();
+    console.log('test_connectivity time:', et - st);
+  }
   if (!testRes || !testRes.ok) throw new Error(result.statusText);
-  const testBody = await testRes.text();
-  // console.log(testBody);
-  if (!(testRes.ok && testBody.startsWith('<html>'))) {
+  if (debug) {
+    console.log("testRes status:", testRes.status);
+  }
+  if (testRes.status !== 204) {
     throw new Error('No connection.');
   }
 }
 
 async function login() {
+  if (debug) {
+    st = performance.now();
+  }
   const response = await pTimeout(fetch("http://10.248.98.2/cgi-bin/get_challenge?callback=" + callback + Date.parse(new Date()) + "&username=" + username + "&ip=" + ip + "&_=" + Date.parse(new Date()), {
     "headers": {
       "accept": "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01",
@@ -58,8 +78,12 @@ async function login() {
     "body": null,
     "method": "GET",
     "mode": "cors"
-  }), 1000);
-  // console.log(response);
+  }), 800);
+  if (debug) {
+    et = performance.now();
+    console.log('get_challenge time:', et - st);
+    console.log('get_challenge response:', response);
+  }
   if (!response || !response.ok) throw new Error(response.statusText);
   const responseBody = await response.text();
   const matches = responseBody.match(/"challenge":"(.*?)",/);
@@ -88,6 +112,9 @@ async function login() {
   i = encodeURIComponent(i);
   hmd5 = encodeURIComponent('{MD5}' + hmd5);
 
+  if (debug) {
+    st = performance.now();
+  }
   const result = await pTimeout(fetch("http://10.248.98.2/cgi-bin/srun_portal?callback=" + callback + Date.parse(new Date()) + "&action=login&username=" + username + "&password=" + hmd5 + "&ac_id=1&ip=" + ip + "&chksum=" + chksum + "&info=" + i + "&n=200&type=1&os=Windows+10&name=Windows&double_stack=0&_=" + Date.parse(new Date()), {
     "headers": {
       "accept": "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01",
@@ -100,21 +127,29 @@ async function login() {
     "body": null,
     "method": "GET",
     "mode": "cors"
-  }), 2000);
-  // console.log(result);
+  }), 800);
+  if (debug) {
+    et = performance.now();
+    console.log('login time:', et - st);
+    console.log('login response:', result);
+  }
   if (!result || !result.ok) throw new Error(result.statusText);
 
   await test_connectivity();
 }
 
-// await login().catch(err => console.log(err));
-try {
-  await test_connectivity()
-} catch {
-  await pRetry(login, {
-    onFailedAttempt: err => {
-      console.log(`Attempt ${err.attemptNumber} failed. There are ${err.retriesLeft} retries left.`);
-    },
-    retries: 14
-  });
+if (debug) {
+  await test_connectivity().catch(err => console.log(err));
+  await login().catch(err => console.log(err));
+} else {
+  try {
+    await test_connectivity();
+  } catch {
+    await pRetry(login, {
+      onFailedAttempt: err => {
+        console.log(`Attempt ${err.attemptNumber} failed. There are ${err.retriesLeft} retries left.`);
+      },
+      retries: 14
+    });
+  }
 }
