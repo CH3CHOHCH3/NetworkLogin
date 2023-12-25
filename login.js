@@ -29,7 +29,8 @@ const getIp = () => {
 
 // 忽略前两个参数, argv 是一个类似 ['node', 'login.js', 'xxx', 'xxx'] 的数组
 const [, , username, password] = process.argv;
-const ip = getIp();
+const isIpSpecified = process.argv[4] !== undefined;
+const ip = isIpSpecified ? process.argv[4] : getIp();
 console.log(ip);
 
 const callback = "jQuery112406199704547613489_";
@@ -143,7 +144,11 @@ if (debug) {
   await login().catch(err => console.log(err));
 } else {
   try {
-    await test_connectivity();
+    if (isIpSpecified) {
+      throw new Error('IP specified.');
+    } else {
+      await test_connectivity();
+    }
   } catch {
     await pRetry(login, {
       onFailedAttempt: err => {
